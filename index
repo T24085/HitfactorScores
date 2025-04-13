@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sunday Shoots Hit Factors Scatter Charts</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <style>
+        .chart-container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        canvas {
+            max-height: 400px;
+        }
+        #error-message {
+            display: none;
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sunday Shoots Hit Factor Charts</h1>
+    <div id="error-message">Error: Unable to load charts. Please try opening this file directly in a browser (e.g., Chrome) instead of an online viewer, or ensure your internet connection allows loading external scripts.</div>
+    <div class="chart-container">
+        <canvas id="course1-chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="course2-chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="course3-chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="combined-chart"></canvas>
+    </div>
+
+    <script>
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js failed to load.');
+                document.getElementById('error-message').style.display = 'block';
+                return;
+            }
+
+            try {
+                // Data: Shooter names and hit factors
+                const shooters = [
+                    { name: "Wayne Leatherberry", c1MinorHF: 3.242, c1MajorHF: 3.422, c2MinorHF: 2.329, c2MajorHF: 2.395, c3MinorHF: 2.593, c3MajorHF: 2.891 },
+                    { name: "Ed Christoffersen", c1MinorHF: 1.636, c1MajorHF: 2.017, c2MinorHF: 1.249, c2MajorHF: 1.563, c3MinorHF: 1.263, c3MajorHF: 1.686 },
+                    { name: "John Lockrey", c1MinorHF: 3.901, c1MajorHF: 3.941, c2MinorHF: 4.282, c2MajorHF: 4.350, c3MinorHF: 4.586, c3MajorHF: 4.638 },
+                    { name: "DJ", c1MinorHF: 3.635, c1MajorHF: 4.295, c2MinorHF: 3.573, c2MajorHF: 4.370, c3MinorHF: 4.972, c3MajorHF: 5.801 },
+                    { name: "Brett Williams", c1MinorHF: 3.757, c1MajorHF: 4.321, c2MinorHF: 3.210, c2MajorHF: 3.879, c3MinorHF: 2.609, c3MajorHF: 3.478 },
+                    { name: "David Beurman", c1MinorHF: 3.362, c1MajorHF: 3.602, c2MinorHF: 2.178, c2MajorHF: 2.351, c3MinorHF: 3.373, c3MajorHF: 3.632 },
+                    { name: "Eric Moore #1", c1MinorHF: 4.283, c1MajorHF: 4.797, c2MinorHF: 4.950, c2MajorHF: 5.610, c3MinorHF: 3.717, c3MajorHF: 4.476 },
+                    { name: "Claude Ferguson", c1MinorHF: 0.159, c1MajorHF: 0.306, c2MinorHF: 0.844, c2MajorHF: 1.123, c3MinorHF: 0.396, c3MajorHF: 0.732 },
+                    { name: "Levi Hawkins", c1MinorHF: 5.552, c1MajorHF: 5.835, c2MinorHF: 6.536, c2MajorHF: 6.536, c3MinorHF: 6.337, c3MajorHF: 6.637 },
+                    { name: "Roy Messick", c1MinorHF: 1.801, c1MajorHF: 2.294, c2MinorHF: 2.139, c2MajorHF: 2.529, c3MinorHF: 2.235, c3MajorHF: 2.669 },
+                    { name: "Mike Higgins", c1MinorHF: 4.450, c1MajorHF: 4.587, c2MinorHF: 4.580, c2MajorHF: 4.627, c3MinorHF: 4.508, c3MajorHF: 4.685 },
+                    { name: "Rick Arens", c1MinorHF: 1.048, c1MajorHF: 1.501, c2MinorHF: 1.645, c2MajorHF: 2.141, c3MinorHF: 0.249, c3MajorHF: 0.581 },
+                    { name: "Chris Hildebrandt", c1MinorHF: 4.156, c1MajorHF: 4.409, c2MinorHF: 4.298, c2MajorHF: 4.594, c3MinorHF: 3.307, c3MajorHF: 3.736 },
+                    { name: "Karl Beurman", c1MinorHF: 4.653, c1MajorHF: 4.893, c2MinorHF: 3.989, c2MajorHF: 4.627, c3MinorHF: 3.159, c3MajorHF: 3.695 },
+                    { name: "Jim Dickerson", c1MinorHF: 1.803, c1MajorHF: 2.225, c2MinorHF: 0.964, c2MajorHF: 1.362, c3MinorHF: 0.799, c3MajorHF: 1.135 },
+                    { name: "Brett Williams #2", c1MinorHF: 3.124, c1MajorHF: 3.749, c2MinorHF: 1.171, c2MajorHF: 1.996, c3MinorHF: 0.904, c3MajorHF: 1.618 },
+                    { name: "Michael Pitts", c1MinorHF: 3.445, c1MajorHF: 3.937, c2MinorHF: 3.615, c2MajorHF: 4.338, c3MinorHF: 6.099, c3MajorHF: 6.809 },
+                    { name: "John Lockrey #2", c1MinorHF: 4.729, c1MajorHF: 4.801, c2MinorHF: 3.639, c2MajorHF: 3.680, c3MinorHF: 4.211, c3MajorHF: 4.318 },
+                    { name: "Eric Moore #2", c1MinorHF: 2.880, c1MajorHF: 3.434, c2MinorHF: 4.824, c2MajorHF: 5.824, c3MinorHF: 6.255, c3MajorHF: 7.506 },
+                    { name: "Mike Higgins #2", c1MinorHF: 4.804, c1MajorHF: 4.853, c2MinorHF: 4.617, c2MajorHF: 4.664, c3MinorHF: 4.058, c3MajorHF: 4.238 },
+                    { name: "Karl Beurman #2", c1MinorHF: 3.985, c1MajorHF: 4.264, c2MinorHF: 3.879, c2MajorHF: 4.198, c3MinorHF: 3.557, c3MajorHF: 3.892 },
+                    { name: "Michael Pitts #2", c1MinorHF: 2.374, c1MajorHF: 2.837, c2MinorHF: 4.153, c2MajorHF: 4.590, c3MinorHF: 5.838, c3MajorHF: 6.362 },
+                    { name: "Rick Arens #2", c1MinorHF: 2.609, c1MajorHF: 3.198, c2MinorHF: 2.814, c2MajorHF: 3.403, c3MinorHF: 2.863, c3MajorHF: 3.477 },
+                    { name: "DJ #2", c1MinorHF: 5.619, c1MajorHF: 6.051, c2MinorHF: 6.038, c2MajorHF: 6.717, c3MinorHF: 2.039, c3MajorHF: 2.946 },
+                    { name: "Chris Hildebrandt #2", c1MinorHF: 3.592, c1MajorHF: 3.928, c2MinorHF: 4.012, c2MajorHF: 4.348, c3MinorHF: 3.374, c3MajorHF: 3.841 }
+                ];
+
+                // Generate unique colors (HSL for distinct hues)
+                const colors = shooters.map((_, i) => `hsl(${i * 360 / shooters.length}, 70%, 50%)`);
+
+                // Common options
+                const commonOptions = {
+                    plugins: {
+                        title: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${shooters[ctx.dataIndex].name}: (${ctx.parsed.x.toFixed(3)}, ${ctx.parsed.y.toFixed(3)})`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Minor Hit Factor' }, min: 0, max: 8 },
+                        y: { title: { display: true, text: 'Major Hit Factor' }, min: 0, max: 8 }
+                    }
+                };
+
+                // Course 1 Chart
+                new Chart(document.getElementById('course1-chart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            data: shooters.map(s => ({ x: s.c1MinorHF, y: s.c1MajorHF })),
+                            backgroundColor: colors,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        plugins: {
+                            ...commonOptions.plugins,
+                            title: { display: true, text: 'Minor vs Major Hit Factors (Course 1)' }
+                        }
+                    }
+                });
+
+                // Course 2 Chart
+                new Chart(document.getElementById('course2-chart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            data: shooters.map(s => ({ x: s.c2MinorHF, y: s.c2MajorHF })),
+                            backgroundColor: colors,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        plugins: {
+                            ...commonOptions.plugins,
+                            title: { display: true, text: 'Minor vs Major Hit Factors (Course 2)' }
+                        }
+                    }
+                });
+
+                // Course 3 Chart
+                new Chart(document.getElementById('course3-chart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            data: shooters.map(s => ({ x: s.c3MinorHF, y: s.c3MajorHF })),
+                            backgroundColor: colors,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        plugins: {
+                            ...commonOptions.plugins,
+                            title: { display: true, text: 'Minor vs Major Hit Factors (Course 3)' }
+                        }
+                    }
+                });
+
+                // Combined Chart
+                new Chart(document.getElementById('combined-chart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Course 1',
+                                data: shooters.map(s => ({ x: s.c1MinorHF, y: s.c1MajorHF })),
+                                backgroundColor: colors,
+                                pointRadius: 6,
+                                pointHoverRadius: 8,
+                                pointStyle: 'circle'
+                            },
+                            {
+                                label: 'Course 2',
+                                data: shooters.map(s => ({ x: s.c2MinorHF, y: s.c2MajorHF })),
+                                backgroundColor: colors,
+                                pointRadius: 6,
+                                pointHoverRadius: 8,
+                                pointStyle: 'rect'
+                            },
+                            {
+                                label: 'Course 3',
+                                data: shooters.map(s => ({ x: s.c3MinorHF, y: s.c3MajorHF })),
+                                backgroundColor: colors,
+                                pointRadius: 6,
+                                pointHoverRadius: 8,
+                                pointStyle: 'triangle'
+                            }
+                        ]
+                    },
+                    options: {
+                        ...commonOptions,
+                        plugins: {
+                            ...commonOptions.plugins,
+                            title: { display: true, text: 'Minor vs Major Hit Factors (All Courses)' },
+                            legend: { display: true, position: 'right' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => {
+                                        const course = ['C1', 'C2', 'C3'][ctx.datasetIndex];
+                                        return `${shooters[ctx.dataIndex].name} (${course}): (${ctx.parsed.x.toFixed(3)}, ${ctx.parsed.y.toFixed(3)})`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                console.log('All charts rendered successfully.');
+            } catch (e) {
+                console.error('Error rendering charts:', e);
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
